@@ -1,10 +1,23 @@
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello, Express is working!');
-});
+const connectDB = require('./config/database');
 
-app.listen(7777, () => {
-  console.log('Server running at http://localhost:7777');
-});
+
+connectDB()
+   .then(()=>{
+
+    console.log("Connected to DB");
+
+    app.listen(7777, ()=>{
+        console.log('Server running at http://localhost:7777');
+    });
+
+   })
+   .catch((err)=>{
+    console.error("DB connection failed", err);
+   });
+
+
+
+
