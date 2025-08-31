@@ -20,13 +20,40 @@ const userSchema = new mongoose.Schema({
 
     email:{
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
     },
 
     gender:{
         type: String,
         required: true   
     }
+,
+    password:{
+        type: String,
+        required: true
+    },
+    age:{
+        type: Number,
+        required: true,
+        min: 18
+    },
+    photoUrl:{
+        type: String,
+     
+    },
+
+    about:{
+        type: String,
+        default: "this is the default about the user"
+    },
+    skills:{
+        type: [String],
+    },
+
+
 });
 
 
