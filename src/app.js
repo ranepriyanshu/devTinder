@@ -1,10 +1,10 @@
 const express = require('express');
 const app = express();
-
 const connectDB = require('./config/database');
-
 const User = require('./models/user');
+const validateSignUpdata = require('./utils/validation');
 
+const bycrypt = require('bcrypt');
 
 // creating api using post  (sign up)
 
@@ -14,10 +14,26 @@ app.use(express.json()); // a middle ware to parse the json data in simple words
 app.post("/signup", async (req, res)=>{
 
 // handling the data dynamically 
+try{
+  validateSignUpdata(req); // here it is validating the data
 
- const user = new User(req.body)
+  // validating the password using bcyrpt 
 
- try{
+  const { firstName, lastName, email, password, age, gender} = req.body;
+
+  const passwordHashed = await bycrypt.hash(password, 10);
+
+ const user = new User(
+
+    {
+      firstName, 
+      lastName,
+      email,
+      password: passwordHashed, 
+        age,
+         gender,
+    }
+ );
     await user.save();
     res.send("user added successfully");
  }catch(err){
@@ -44,6 +60,32 @@ app.post("/signup", async (req, res)=>{
   // }
 
 
+})
+
+
+app.post("/login", async (req, res)=>{
+  
+try{
+
+  const {email, password} = req.body;
+
+  const user = await User.findOne({email});
+
+  if(!user){
+    res.status(400).send("User not found");
+  }
+
+  const isPasswordValid = await bycrypt.compare(password, user.password);
+  
+   if(isPasswordValid){
+    res.send("Login successful");
+   }else{
+    res.status(400).send("Invalid credentials");
+   }
+  }
+  catch(err){
+    res.status(400).send("Error saving user"+ err);
+  }
 })
 
 
