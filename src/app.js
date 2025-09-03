@@ -5,11 +5,17 @@ const User = require('./models/user');
 const validateSignUpdata = require('./utils/validation');
 
 const bycrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+
+const jwt = require('jsonwebtoken');
+
+const {adminAuth} = require('./middleware/auth');
+
 
 // creating api using post  (sign up)
 
-app.use(express.json()); // a middle ware to parse the json data in simple words it coverts json data to object
-
+app.use(express.json());// a middle ware to parse the json data in simple words it coverts json data to object
+app.use(cookieParser());
 
 app.post("/signup", async (req, res)=>{
 
@@ -78,6 +84,25 @@ try{
   const isPasswordValid = await bycrypt.compare(password, user.password);
   
    if(isPasswordValid){
+
+    // create a JWT 
+
+    const token = jwt.sign({id: user._id}, "secret");
+    console.log(token);
+    
+
+    // add the token to cookie and sent response back to user 
+
+    // a trial cookie 
+
+    res.cookie("token", token);
+
+
+
+
+
+
+
     res.send("Login successful");
    }else{
     res.status(400).send("Invalid credentials");
@@ -159,10 +184,25 @@ app.patch("/user/:userId", async (req, res)=>{
   }
  
   
-})
+});
+
+
 
 
 // updating the user details
+app.get("/profile", adminAuth ,async (req, res) => {
+  try {
+    
+
+    // verify the token
+  
+
+    const user = req.user; 
+     res.send(user);
+  } catch (err) {
+    res.status(400).send("Error fetching profile: " + err.message);
+  }
+});
 
 
 connectDB()
